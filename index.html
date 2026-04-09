@@ -9,33 +9,36 @@
 body {
     margin: 0;
     overflow: hidden;
-    font-family: 'Poppins', sans-serif;
+    font-family: Arial, sans-serif;
     background: linear-gradient(135deg, #ff758c, #ff7eb3);
-    color: white;
-    text-align: center;
 }
 
-/* Title */
+/* TEXT FIX */
 h1 {
     position: absolute;
     top: 35%;
     width: 100%;
+    text-align: center;
     font-size: 3rem;
+    color: white;
+    z-index: 10; /* IMPORTANT */
     animation: glow 2s infinite alternate;
 }
 
-@keyframes glow {
-    from { text-shadow: 0 0 10px #fff, 0 0 20px #ff4d6d; }
-    to { text-shadow: 0 0 20px #fff, 0 0 40px #ff1a4d; }
-}
-
-/* Message */
 #message {
     position: absolute;
     top: 50%;
     width: 100%;
+    text-align: center;
     font-size: 1.3rem;
-    opacity: 0.9;
+    color: white;
+    z-index: 10; /* IMPORTANT */
+}
+
+/* Glow animation */
+@keyframes glow {
+    from { text-shadow: 0 0 10px #fff; }
+    to { text-shadow: 0 0 25px #fff, 0 0 40px #ff1a4d; }
 }
 
 /* Hearts */
@@ -46,6 +49,7 @@ h1 {
     background: red;
     transform: rotate(45deg);
     animation: float 6s linear infinite;
+    z-index: 5;
 }
 
 .heart::before,
@@ -66,10 +70,12 @@ h1 {
     100% { transform: translateY(-10vh) rotate(45deg); opacity: 0; }
 }
 
+/* Canvas behind text */
 canvas {
     position: absolute;
     top: 0;
     left: 0;
+    z-index: 1; /* behind everything */
 }
 </style>
 </head>
@@ -80,29 +86,23 @@ canvas {
 <div id="message"></div>
 <canvas id="fireworks"></canvas>
 
-<!-- Optional Music -->
-<audio autoplay loop>
-  <source src="https://www.bensound.com/bensound-music/bensound-romantic.mp3" type="audio/mp3">
-</audio>
-
 <script>
 // TYPEWRITER MESSAGE
-const text = "You are my favorite person 💖\nEvery moment with you is special ✨\nI love you forever ❤️";
-let index = 0;
+const text = "You are my favorite person 💖\nI love you forever ❤️";
+let i = 0;
 
 function typeWriter() {
-    if (index < text.length) {
-        document.getElementById("message").innerHTML += text.charAt(index);
-        index++;
+    if (i < text.length) {
+        document.getElementById("message").innerHTML += text.charAt(i) === "\n" ? "<br>" : text.charAt(i);
+        i++;
         setTimeout(typeWriter, 50);
     }
 }
 typeWriter();
 
-
 // FIREWORKS
-const canvas = document.getElementById('fireworks');
-const ctx = canvas.getContext('2d');
+const canvas = document.getElementById("fireworks");
+const ctx = canvas.getContext("2d");
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
@@ -110,56 +110,50 @@ canvas.height = window.innerHeight;
 let particles = [];
 
 function createFirework(x, y) {
-    for (let i = 0; i < 60; i++) {
+    for (let i = 0; i < 50; i++) {
         particles.push({
-            x: x,
-            y: y,
-            angle: Math.random() * 2 * Math.PI,
-            speed: Math.random() * 5 + 2,
-            radius: 2
+            x, y,
+            angle: Math.random() * Math.PI * 2,
+            speed: Math.random() * 5 + 2
         });
     }
 }
 
-function animateFireworks() {
+function animate() {
     ctx.fillStyle = "rgba(0,0,0,0.2)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    particles.forEach((p, i) => {
+    particles.forEach((p, index) => {
         p.x += Math.cos(p.angle) * p.speed;
         p.y += Math.sin(p.angle) * p.speed;
         p.speed *= 0.97;
 
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
         ctx.fillStyle = "white";
         ctx.fill();
 
-        if (p.speed < 0.5) particles.splice(i, 1);
+        if (p.speed < 0.5) particles.splice(index, 1);
     });
 
-    requestAnimationFrame(animateFireworks);
+    requestAnimationFrame(animate);
 }
 
 setInterval(() => {
     createFirework(Math.random() * canvas.width, Math.random() * canvas.height / 2);
-}, 700);
+}, 800);
 
-animateFireworks();
+animate();
 
-
-// FLOATING HEARTS
-function createHeart() {
+// HEARTS
+setInterval(() => {
     const heart = document.createElement("div");
-    heart.classList.add("heart");
+    heart.className = "heart";
     heart.style.left = Math.random() * 100 + "vw";
-    heart.style.animationDuration = (Math.random() * 3 + 3) + "s";
     document.body.appendChild(heart);
 
     setTimeout(() => heart.remove(), 6000);
-}
-
-setInterval(createHeart, 300);
+}, 300);
 </script>
 
 </body>
